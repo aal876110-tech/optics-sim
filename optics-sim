@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>محاكي الانعكاس والانكسار - الأستاذ علي عبدالستار</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html{
+    background:#08152f;
+}
+
+body{
+    font-family:Tahoma,Arial,sans-serif;
+    background:linear-gradient(135deg,#08152f,#102d52,#173e68);
+    color:#fff;
+    min-height:100vh;
+    padding:15px;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+}
+
+header{
+    position:relative;
+    text-align:center;
+    background:linear-gradient(135deg,#123b6d,#176b9f);
+    border:2px solid #3ebfff;
+    border-radius:20px;
+    padding:18px;
+    margin-bottom:15px;
+    box-shadow:0 8px 25px rgba(0,0,0,.35);
+}
+
+header h1{
+    font-size:clamp(22px,4vw,34px);
+    color:#fff;
+    margin-bottom:7px;
+}
+
+header p{
+    color:#bdeeff;
+    font-size:16px;
+}
+
+.author{
+    display:inline-block;
+    margin-top:10px;
+    background:#082746;
+    border-radius:30px;
+    padding:7px 16px;
+    color:#ffd85a;
+    font-weight:bold;
+}
+
+.controls{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+    margin-bottom:15px;
+}
+
+.card{
+    position:relative;
+    background:rgba(255,255,255,.09);
+    border:1px solid rgba(255,255,255,.2);
+    border-radius:17px;
+    padding:15px;
+    box-shadow:0 6px 20px rgba(0,0,0,.2);
+    backdrop-filter:blur(8px);
+}
+
+.card h2{
+    color:#59d5ff;
+    font-size:18px;
+    margin-bottom:12px;
+}
+
+label{
+    display:block;
+    margin:8px 0 5px;
+    color:#e6f8ff;
+    font-weight:bold;
+}
+
+select,input[type=range]{
+    width:100%;
+}
+
+select{
+    background:#092846;
+    color:#fff;
+    border:1px solid #38bdf8;
+    border-radius:9px;
+    padding:9px;
+    font-size:15px;
+}
+
+input[type=range]{
+    accent-color:#38bdf8;
+    cursor:pointer;
+}
+
+.value{
+    color:#ffd85a;
+    font-weight:bold;
+    float:left;
+}
+
+.fraction-block{
+    margin-top:12px;
+    padding-top:10px;
+    border-top:1px dashed rgba(255,255,255,.2);
+}
+
+.angle-precise-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:10px;
+}
+
+.inline-label{
+    margin:0;
+    white-space:nowrap;
+    font-size:14px;
+}
+
+#angleNumber{
+    background:#092846;
+    color:#ffd85a;
+    font-weight:bold;
+    border:1px solid #38bdf8;
+    border-radius:9px;
+    padding:8px;
+    font-size:15px;
+    width:100%;
+    text-align:center;
+}
+
+.range-warning.show{
+    display:block;
+}
+
+button{
+    width:100%;
+    border:none;
+    border-radius:11px;
+    padding:11px;
+    background:linear-gradient(135deg,#00a8e8,#006fc9);
+    color:#fff;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    margin-top:8px;
+}
+
+button:active{
+    transform:scale(.98);
+}
+
+.simulation{
+    background:#061525;
+    border:2px solid #267ba8;
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 10px 30px rgba(0,0,0,.4);
+}
+
+.sim-title{
+    padding:12px 16px;
+    background:#0c2942;
+    color:#fff;
+    font-weight:bold;
+    text-align:center;
+}
+
+canvas{
+    display:block;
+    width:100%;
+    height:auto;
+    background:#020b16;
+}
+
+.results{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin-top:15px;
+}
+
+.result{
+    background:linear-gradient(135deg,#12365a,#0a243d);
+    border:1px solid #287da8;
+    border-radius:15px;
+    padding:13px;
+    text-align:center;
+    transition:opacity .2s;
+}
+
+.result.dim{
+    opacity:.35;
+}
+
+.result .number{
+    display:block;
+    color:#ffd85a;
+    font-size:22px;
+    font-weight:bold;
+    margin-top:5px;
+}
+
+.explanation{
+    margin-top:15px;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:18px;
+    padding:17px;
+    line-height:1.9;
+}
+
+.explanation h2{
+    color:#59d5ff;
+    margin-bottom:8px;
+}
+
+.formula{
+    direction:ltr;
+    text-align:center;
+    background:#061b2d;
+    color:#ffd85a;
+    padding:12px;
+    border-radius:10px;
+    margin:10px 0;
+    font-size:20px;
+    font-weight:bold;
+}
+
+.note{
+    color:#bdeeff;
+}
+
+footer{
+    text-align:center;
+    margin-top:15px;
+    color:#8fcde6;
+    font-size:13px;
+}
+
+/* ===== شاشة البداية ===== */
+
+#startScreen{
+    position:fixed;
+    inset:0;
+    z-index:999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:radial-gradient(circle at 50% 20%,#164b7a,#08152f 70%);
+}
+
+.start-box{
+    max-width:480px;
+    width:100%;
+    text-align:center;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.2);
+    border-radius:24px;
+    padding:40px 28px;
+    box-shadow:0 15px 40px rgba(0,0,0,.45);
+    backdrop-filter:blur(8px);
+}
+
+.start-icon{
+    font-size:54px;
+    margin-bottom:10px;
+}
+
+.start-box h1{
+    font-size:clamp(22px,5vw,30px);
+    color:#fff;
+    margin-bottom:10px;
+    line-height:1.5;
+}
+
+.start-box .subject{
+    color:#bdeeff;
+    font-size:16px;
+    margin-bottom:22px;
+}
+
+.start-teacher{
+    display:inline-block;
+    background:#082746;
+    border:1px solid #38bdf8;
+    border-radius:30px;
+    padding:9px 20px;
+    color:#ffd85a;
+    font-weight:bold;
+    font-size:15px;
+    margin-bottom:8px;
+}
+
+.start-rights{
+    color:#7fb8d6;
+    font-size:12px;
+    margin-bottom:28px;
+}
+
+#startBtn{
+    width:100%;
+    border:none;
+    border-radius:14px;
+    padding:15px;
+    background:linear-gradient(135deg,#00a8e8,#006fc9);
+    color:#fff;
+    font-size:19px;
+    font-weight:bold;
+    cursor:pointer;
+    box-shadow:0 8px 20px rgba(0,111,201,.4);
+}
+
+#startBtn:active{
+    transform:scale(.98);
+}
+
+.custom-select{
+    position:relative;
+}
+
+.cs-trigger{
+    width:100%;
+    background:#092846;
+    color:#fff;
+    border:1px solid #38bdf8;
+    border-radius:9px;
+    padding:9px;
+    font-size:15px;
+    font-family:inherit;
+    text-align:right;
+    cursor:pointer;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+}
+
+.cs-trigger .arrow{
+    transition:transform .2s;
+    color:#38bdf8;
+}
+
+.cs-trigger.open .arrow{
+    transform:rotate(180deg);
+}
+
+.cs-options{
+    margin-top:6px;
+    background:#0c2942;
+    border:1px solid #38bdf8;
+    border-radius:9px;
+    max-height:220px;
+    overflow-y:auto;
+    display:none;
+}
+
+.cs-options.open{
+    display:block;
+}
+
+.cs-option{
+    padding:11px 12px;
+    cursor:pointer;
+    font-size:15px;
+    color:#e6f8ff;
+    border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.cs-option:last-child{
+    border-bottom:none;
+}
+
+.cs-option:hover,
+.cs-option.selected{
+    background:#00a8e8;
+    color:#fff;
+}
+
+select.native-select-hidden{
+    display:none;
+}
+
+#mainContent{
+    display:none;
+}
+
+/* ===== زر تدوير الشاشة ===== */
+
+#rotateBtn{
+    position:absolute;
+    top:52px;
+    left:14px;
+    z-index:50;
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    border:2px solid #3ebfff;
+    background:linear-gradient(135deg,#00a8e8,#006fc9);
+    color:#fff;
+    font-size:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    box-shadow:0 4px 15px rgba(0,0,0,.4);
+    transition:transform .2s;
+}
+
+#rotateBtn:active{
+    transform:scale(.9);
+}
+
+body.rotated-view{
+    position:fixed;
+    top:0;
+    left:100%;
+    width:100dvh;
+    height:100dvw;
+    min-height:0;
+    transform:rotate(90deg);
+    transform-origin:top left;
+    overflow:auto;
+    -webkit-overflow-scrolling:touch;
+    touch-action:pan-x pan-y;
+}
+
+html.rotated-html{
+    overflow:hidden;
+    height:100%;
+}
+
+@media(max-width:800px){
+    .controls{
+        grid-template-columns:1fr;
+    }
+
+    .results{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:520px){
+    body{
+        padding:8px;
+    }
+
+    header{
+        padding:13px;
+    }
+
+    .card{
+        padding:12px;
+    }
+
+    .results{
+        gap:7px;
+    }
+
+    .result{
+        padding:10px 5px;
+    }
+
+    .result .number{
+        font-size:19px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="startScreen">
+    <div class="start-box">
+        <div class="start-icon">🌈</div>
+        <h1>محاكي الانعكاس والانكسار</h1>
+        <div class="subject">تجربة في فيزياء الرابع العلمي</div>
+
+        <div class="start-teacher">👨‍🏫 إعداد الأستاذ علي عبدالستار</div>
+        <div class="start-rights">© جميع الحقوق محفوظة للأستاذ علي عبدالستار</div>
+
+        <button id="startBtn">🚀 ابدأ التجربة</button>
+    </div>
+</div>
+
+<div id="mainContent">
+<div class="container">
+
+<header>
+    <button id="rotateBtn" title="تدوير الشاشة">🔄</button>
+    <h1>🌈 محاكي الانعكاس والانكسار</h1>
+    <p>فيزياء الرابع العلمي</p>
+    <div class="author">👨‍🏫 إعداد الأستاذ علي عبدالستار</div>
+</header>
+
+<div class="controls">
+
+    <div class="card">
+        <h2>💧 الوسط الأول</h2>
+
+        <label>اختر الوسط:</label>
+
+        <select id="medium1">
+            <option value="1.00">الهواء — n = 1.00</option>
+            <option value="1.330070568294512">الماء — n = 1.33</option>
+            <option value="1.5212011806012264" selected>الزجاج — n = 1.52</option>
+            <option value="2.419764435660177">الألماس — n = 2.42</option>
+        </select>
+    </div>
+
+
+    <div class="card">
+        <h2>🔮 الوسط الثاني</h2>
+
+        <label>اختر الوسط:</label>
+
+        <select id="medium2">
+            <option value="1.00" selected>الهواء — n = 1.00</option>
+            <option value="1.330070568294512">الماء — n = 1.33</option>
+            <option value="1.5212011806012264">الزجاج — n = 1.52</option>
+            <option value="2.419764435660177">الألماس — n = 2.42</option>
+        </select>
+    </div>
+
+
+    <div class="card">
+        <h2>🪞 نوع الظاهرة</h2>
+
+        <label>اختر الظاهرة:</label>
+        <select id="mode">
+            <option value="both">الانعكاس والانكسار</option>
+            <option value="reflection">الانعكاس فقط</option>
+            <option value="refraction">الانكسار فقط</option>
+        </select>
+
+        <label>زاوية السقوط:
+            <span class="value" id="angleValue">40.00°</span>
+        </label>
+
+        <input
+            id="angle"
+            type="range"
+            min="1"
+            max="90"
+            value="40"
+            step="1"
+        >
+
+        <div class="fraction-block">
+            <label>الجزء العشري (يُضاف لأي درجة):
+                <span class="value" id="fractionValue">.00</span>
+            </label>
+
+            <input
+                id="angleFraction"
+                type="range"
+                min="0"
+                max="99"
+                value="0"
+                step="1"
+            >
+        </div>
+
+        <div class="angle-precise-row">
+            <label for="angleNumber" class="inline-label">قيمة دقيقة:</label>
+            <input
+                id="angleNumber"
+                type="number"
+                min="1"
+                max="90"
+                value="40.00"
+                step="0.01"
+            >
+        </div>
+
+        <button id="reset">🔄 إعادة الضبط</button>
+    </div>
+
+</div>
+
+
+<div class="simulation">
+
+    <div class="sim-title">
+        🔦 مسار الشعاع الضوئي
+    </div>
+
+    <canvas id="canvas" width="1000" height="600"></canvas>
+
+</div>
+
+
+<div class="results">
+
+    <div class="result" id="cardIncidence">
+        زاوية السقوط
+        <span class="number" id="rAngle">40°</span>
+    </div>
+
+    <div class="result" id="cardReflection">
+        زاوية الانعكاس
+        <span class="number" id="refAngle">40°</span>
+    </div>
+
+    <div class="result" id="cardRefraction">
+        زاوية الانكسار
+        <span class="number" id="refrAngle">29.1°</span>
+    </div>
+
+    <div class="result">
+        معامل الانكسار النسبي n₂₁ = n₂/n₁
+        <span class="number" id="indexResult">1.33</span>
+    </div>
+
+    <div class="result" id="cardCritical">
+        الزاوية الحرجة
+        <span class="number" id="criticalAngle">—</span>
+    </div>
+
+</div>
+
+
+<div class="explanation">
+
+    <h2>📚 ماذا يحدث؟</h2>
+
+    <p class="note">
+        عند سقوط شعاع ضوئي على السطح الفاصل بين وسطين، يمكن أن يحدث
+        انعكاس للشعاع، وانكسار لجزء منه عند دخوله الوسط الثاني.
+    </p>
+
+    <div class="formula">
+        θᵢ = θᵣ
+    </div>
+
+    <p class="note">
+        قانون الانعكاس: زاوية السقوط تساوي زاوية الانعكاس.
+    </p>
+
+    <div class="formula">
+        n₁ sin(θ₁) = n₂ sin(θ₂)
+    </div>
+
+    <p class="note">
+        وهذا هو قانون سنل للانكسار.
+    </p>
+
+    <div class="formula">
+        θc = sin⁻¹(n₂ / n₁) &nbsp;&nbsp; عندما n₁ &gt; n₂
+    </div>
+
+    <p class="note">
+        الزاوية الحرجة هي زاوية السقوط التي تكون عندها زاوية الانكسار 90°.
+        يحدث الانعكاس الكلي الداخلي عندما يكون n₁ &gt; n₂ وتكون زاوية السقوط أكبر من الزاوية الحرجة.
+    </p>
+
+</div>
+
+
+<footer>
+    محاكي تفاعلي تعليمي — فيزياء الرابع العلمي
+</footer>
+
+</div>
+</div>
+
+
+<script>
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const angleSlider = document.getElementById("angle");
+const angleValue = document.getElementById("angleValue");
+const angleNumber = document.getElementById("angleNumber");
+const angleFraction = document.getElementById("angleFraction");
+const fractionValue = document.getElementById("fractionValue");
+
+const medium1 = document.getElementById("medium1");
+const medium2 = document.getElementById("medium2");
+
+const mode = document.getElementById("mode");
+
+const rAngle = document.getElementById("rAngle");
+const refAngle = document.getElementById("refAngle");
+const refrAngle = document.getElementById("refrAngle");
+const indexResult = document.getElementById("indexResult");
+const criticalAngle = document.getElementById("criticalAngle");
+const cardCritical = document.getElementById("cardCritical");
+
+const cardReflection = document.getElementById("cardReflection");
+const cardRefraction = document.getElementById("cardRefraction");
+
+const reset = document.getElementById("reset");
+
+
+/*
+   قوائم منسدلة مخصصة (بدل القائمة الأصلية native <select>) حتى تدور
+   مع الصفحة عند الضغط على زر التدوير، لأن القائمة الأصلية للمتصفح
+   عنصر نظام تشغيل ولا تتأثر بتدوير CSS
+*/
+
+function makeCustomSelect(select){
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "custom-select";
+
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "cs-trigger";
+    trigger.innerHTML = '<span class="cs-label"></span><span class="arrow">▾</span>';
+
+    const optionsBox = document.createElement("div");
+    optionsBox.className = "cs-options";
+
+    function updateLabel(){
+        const selected = select.options[select.selectedIndex];
+        trigger.querySelector(".cs-label").textContent =
+            selected ? selected.textContent : "";
+    }
+
+    function syncSelectedClass(){
+        optionsBox.querySelectorAll(".cs-option").forEach(function(o){
+            o.classList.toggle("selected", o.dataset.value === select.value);
+        });
+    }
+
+    Array.from(select.options).forEach(function(opt){
+
+        const item = document.createElement("div");
+        item.className = "cs-option";
+        item.textContent = opt.textContent;
+        item.dataset.value = opt.value;
+
+        if(opt.selected) item.classList.add("selected");
+
+        item.addEventListener("click", function(){
+
+            select.value = opt.value;
+            updateLabel();
+            syncSelectedClass();
+
+            optionsBox.classList.remove("open");
+            trigger.classList.remove("open");
+
+            select.dispatchEvent(new Event("change"));
+
+        });
+
+        optionsBox.appendChild(item);
+
+    });
+
+    updateLabel();
+
+    trigger.addEventListener("click", function(e){
+
+        e.stopPropagation();
+
+        document.querySelectorAll(".cs-options.open").forEach(function(o){
+            if(o !== optionsBox) o.classList.remove("open");
+        });
+
+        document.querySelectorAll(".cs-trigger.open").forEach(function(t){
+            if(t !== trigger) t.classList.remove("open");
+        });
+
+        optionsBox.classList.toggle("open");
+        trigger.classList.toggle("open");
+
+    });
+
+    select.classList.add("native-select-hidden");
+    select.insertAdjacentElement("afterend", wrapper);
+
+    wrapper.appendChild(trigger);
+    wrapper.appendChild(optionsBox);
+
+    // يسمح بتحديث الشكل الظاهري عند تغيير القيمة برمجياً (مثلاً زر إعادة الضبط)
+    select._csSync = function(){
+        updateLabel();
+        syncSelectedClass();
+    };
+
+}
+
+document.addEventListener("click", function(){
+    document.querySelectorAll(".cs-options.open").forEach(function(o){
+        o.classList.remove("open");
+    });
+    document.querySelectorAll(".cs-trigger.open").forEach(function(t){
+        t.classList.remove("open");
+    });
+});
+
+[medium1, medium2, mode].forEach(makeCustomSelect);
+
+
+/*
+   يحسب الزاوية الحرجة (بالدرجات) إن وُجدت، أو null إن لم توجد
+   (لا توجد زاوية حرجة إلا عند الانتقال من وسط أكثر كثافة n1 إلى وسط أقل كثافة n2)
+*/
+
+/*
+   السلايدر الرئيسي (angle) عدد صحيح بسيط من 1° إلى 90°، يتحرك درجة
+   درجة بالضبط بلا أي تخطي أو قفز لأي رقم.
+
+   سلايدر الجزء العشري (angleFraction) يضيف كسراً من 0.00 إلى 0.99
+   فوق أي درجة يقف عليها السلايدر الرئيسي — يعمل بشكل موحّد على كامل
+   المدى من 1° إلى 90° وليس مقتصراً على منطقة معينة.
+
+   خانة "قيمة دقيقة" (angleNumber) طريقة بديلة لكتابة الزاوية مباشرة،
+   وتبقى الثلاثة متزامنة مع بعضها.
+*/
+
+function getAngle(){
+
+    const mainVal = Number(angleSlider.value);
+    const frac = Number(angleFraction.value) / 100;
+
+    return Math.min(90, Number((mainVal + frac).toFixed(2)));
+
+}
+
+
+/*
+   يضبط السلايدرين (والخانة الرقمية) معاً ليمثلوا قيمة زاوية معينة
+   (تُستخدم من خانة الإدخال اليدوي وزر إعادة الضبط)
+*/
+function setAngle(value){
+
+    value = Math.max(1, Math.min(90, value));
+
+    let mainVal = Math.floor(value);
+    let frac = Math.round((value - mainVal) * 100);
+
+    if(frac >= 100){
+        mainVal += 1;
+        frac = 0;
+    }
+
+    if(mainVal >= 90){
+        mainVal = 90;
+        frac = 0;
+    }
+
+    angleSlider.value = mainVal;
+    angleFraction.value = frac;
+    angleNumber.value = value.toFixed(2);
+
+}
+
+
+/*
+   جدول يربط كل وسط (بقيمته الدقيقة لمعامل الانكسار) باسمه العربي
+   ولونه المميز بالرسمة. هذا يخلي لون كل منطقة بالرسم يتبع الوسط
+   نفسه أينما كان (فوق أو تحت)، فلو بدّلت الوسط الأول مع الثاني
+   ينتقل اللون والاسم وياه تلقائياً بدل ما يبقى ثابتاً بمكانه.
+*/
+const MEDIA_INFO = [
+    { n: 1.00,                 name: "الهواء",  color: "#0c2e52" },
+    { n: 1.330070568294512,    name: "الماء",   color: "#04425c" },
+    { n: 1.5212011806012264,   name: "الزجاج",  color: "#1a4a5e" },
+    { n: 2.419764435660177,    name: "الألماس", color: "#3a2f5c" }
+];
+
+function getMediumInfo(n){
+
+    let best = MEDIA_INFO[0];
+    let bestDiff = Infinity;
+
+    for(const m of MEDIA_INFO){
+
+        const diff = Math.abs(m.n - n);
+
+        if(diff < bestDiff){
+            bestDiff = diff;
+            best = m;
+        }
+
+    }
+
+    return best;
+
+}
+
+
+function computeCritical(n1,n2){
+
+    if(n1 > n2){
+        return Math.asin(n2/n1) * 180 / Math.PI;
+    }
+
+    return null;
+
+}
+
+
+function calculate(){
+
+    const angle = getAngle();
+
+    fractionValue.textContent =
+        "." + String(Number(angleFraction.value)).padStart(2,"0");
+
+    angleNumber.value = angle.toFixed(2);
+
+    const n1 = Number(medium1.value);
+    const n2 = Number(medium2.value);
+
+    const rad = angle * Math.PI / 180;
+
+    let sinR = (n1 / n2) * Math.sin(rad);
+
+    let refracted = null;
+
+    // الزاوية الحرجة توجد فقط عند الانتقال من n1 الأكبر إلى n2 الأصغر
+    let critical = computeCritical(n1,n2);
+
+    // عند الزاوية الحرجة بالضبط، يكون الشعاع المنكسر عند 90° تماماً
+    // (هذا هو تعريف الزاوية الحرجة نفسه)، فتُعرض "90.00°" كقيمة حقيقية.
+    // الهامش الصغير جداً (epsilon) يمتص فقط خطأ التقريب العشري لعمليات
+    // الجيب ومعكوسه عند هذه النقطة الحدّية بالضبط؛ أي زاوية تتجاوزها
+    // بوضوح (أكبر من هذا الهامش المتناهي الصغر) تعطي انعكاساً كلياً.
+    const EPS = 1e-6;
+
+    if(sinR <= 1 + EPS){
+
+        refracted =
+            Math.asin(Math.min(sinR,1)) * 180 / Math.PI;
+
+    }
+
+    angleValue.textContent = angle.toFixed(2) + "°";
+
+    rAngle.textContent = angle.toFixed(2) + "°";
+
+    refAngle.textContent = angle.toFixed(2) + "°";
+
+    if(refracted === null){
+
+        refrAngle.textContent = "انعكاس كلي";
+
+    }else{
+
+        refrAngle.textContent =
+            refracted.toFixed(2) + "°";
+
+    }
+
+    // معامل الانكسار النسبي للوسط الثاني بالنسبة للأول
+    indexResult.textContent = (n2 / n1).toFixed(2);
+
+    // عرض الزاوية الحرجة فقط عندما n1 > n2
+    if(critical !== null){
+
+        criticalAngle.textContent =
+            critical.toFixed(2) + "°";
+
+        cardCritical.classList.remove("dim");
+
+    }else{
+
+        criticalAngle.textContent = "غير موجودة";
+
+        cardCritical.classList.add("dim");
+
+    }
+
+    // إخفاء/إظهار بطاقات النتائج حسب الظاهرة المختارة
+    cardReflection.classList.toggle(
+        "dim",
+        mode.value === "refraction"
+    );
+
+    cardRefraction.classList.toggle(
+        "dim",
+        mode.value === "reflection"
+    );
+
+    draw(angle,refracted,n1,n2,critical);
+}
+
+
+function draw(angle,refracted,n1,n2,critical){
+
+    const w = canvas.width;
+    const h = canvas.height;
+
+    ctx.clearRect(0,0,w,h);
+
+    /*
+       الخلفية
+    */
+
+    ctx.fillStyle = "#020b16";
+    ctx.fillRect(0,0,w,h);
+
+
+    // معلومات كل وسط (الاسم واللون) حسب قيمته الفعلية
+    const info1 = getMediumInfo(n1);
+    const info2 = getMediumInfo(n2);
+
+
+    /*
+       الوسط الأول
+    */
+
+    ctx.fillStyle = info1.color;
+    ctx.fillRect(0,0,w,h/2);
+
+
+    /*
+       الوسط الثاني
+    */
+
+    ctx.fillStyle = info2.color;
+    ctx.fillRect(0,h/2,w,h/2);
+
+
+    /*
+       السطح الفاصل
+    */
+
+    ctx.strokeStyle = "#72e6ff";
+    ctx.lineWidth = 4;
+
+    ctx.beginPath();
+    ctx.moveTo(0,h/2);
+    ctx.lineTo(w,h/2);
+    ctx.stroke();
+
+
+    /*
+       أسماء الأوساط (الاسم الفعلي + معامل الانكسار)
+    */
+
+    ctx.font = "bold 24px Tahoma";
+    ctx.fillStyle = "#bdeeff";
+
+    ctx.textAlign = "right";
+
+    ctx.fillText(
+        "الوسط الأول: " + info1.name + "  n₁ = " + n1.toFixed(2),
+        w-25,
+        45
+    );
+
+    ctx.fillStyle = "#aef5df";
+
+    ctx.fillText(
+        "الوسط الثاني: " + info2.name + "  n₂ = " + n2.toFixed(2),
+        w-25,
+        h-25
+    );
+
+
+    /*
+       نقطة السقوط
+    */
+
+    const x0 = w/2;
+    const y0 = h/2;
+
+
+    /*
+       العمود المقام
+    */
+
+    ctx.strokeStyle = "rgba(255,255,255,.45)";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([10,10]);
+
+    ctx.beginPath();
+
+    ctx.moveTo(x0,40);
+    ctx.lineTo(x0,h-40);
+
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+
+
+    /*
+       عنوان العمود
+    */
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "18px Tahoma";
+
+    ctx.textAlign = "left";
+
+    ctx.fillText(
+        "العمود المقام",
+        x0+12,
+        70
+    );
+
+
+    /*
+       زاوية بالراديان
+    */
+
+    const a = angle * Math.PI / 180;
+
+
+    /*
+       الشعاع الساقط
+       من أعلى اليسار إلى نقطة السقوط
+    */
+
+    const L = 330;
+
+    const ix =
+        x0 - L * Math.sin(a);
+
+    const iy =
+        y0 - L * Math.cos(a);
+
+
+    /*
+       رسم الشعاع الساقط (يُرسم دائماً بغض النظر عن الوضع)
+    */
+
+    drawRay(
+        ix,
+        iy,
+        x0,
+        y0,
+        "#ffd84d",
+        7
+    );
+
+
+    /*
+       الشعاع المنعكس
+    */
+
+    if(mode.value !== "refraction"){
+
+        const rx =
+            x0 + L * Math.sin(a);
+
+        const ry =
+            y0 - L * Math.cos(a);
+
+        drawRay(
+            x0,
+            y0,
+            rx,
+            ry,
+            "#ff5c69",
+            7
+        );
+
+        drawArrow(
+            x0,
+            y0,
+            rx,
+            ry,
+            "#ff5c69"
+        );
+
+    }
+
+
+    /*
+       الشعاع المنكسر
+    */
+
+    if(
+        mode.value !== "reflection" &&
+        refracted !== null
+    ){
+
+        const b =
+            refracted * Math.PI / 180;
+
+        const R = 300;
+
+        const tx =
+            x0 + R * Math.sin(b);
+
+        const ty =
+            y0 + R * Math.cos(b);
+
+        drawRay(
+            x0,
+            y0,
+            tx,
+            ty,
+            "#54e6a7",
+            7
+        );
+
+        drawArrow(
+            x0,
+            y0,
+            tx,
+            ty,
+            "#54e6a7"
+        );
+
+    }
+
+
+    /*
+       نقطة السقوط
+    */
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x0,
+        y0,
+        9,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+
+
+    /*
+       أسماء الأشعة
+    */
+
+    ctx.font = "bold 20px Tahoma";
+    ctx.textAlign = "center";
+
+    ctx.fillStyle = "#ffd84d";
+
+    // موقع ثابت (لا يتغير مع زاوية السقوط)، بنفس منطق تسمية
+    // الشعاعين الآخرين: إزاحة ثابتة عن نقطة السقوط x0,y0
+    ctx.fillText(
+        "الشعاع الساقط",
+        x0-145,
+        y0-125
+    );
+
+
+    if(mode.value !== "refraction"){
+
+        ctx.fillStyle = "#ff6975";
+
+        ctx.fillText(
+            "الشعاع المنعكس",
+            clamp(x0+145, 90, w-90),
+            clamp(y0-125, 30, h-30)
+        );
+
+    }
+
+
+    if(
+        mode.value !== "reflection" &&
+        refracted !== null
+    ){
+
+        ctx.fillStyle = "#54e6a7";
+
+        ctx.fillText(
+            "الشعاع المنكسر",
+            clamp(x0+150, 90, w-90),
+            clamp(y0+150, 30, h-30)
+        );
+
+    }
+
+
+    /*
+       رسم الأقواس الزاوية مع قيمها
+    */
+
+    drawAngleArc(
+        x0,
+        y0,
+        angle,
+        angle.toFixed(2) + "°",
+        "#ffd84d",
+        "top-left"
+    );
+
+
+    if(mode.value !== "refraction"){
+
+        drawAngleArc(
+            x0,
+            y0,
+            angle,
+            angle.toFixed(2) + "°",
+            "#ff6975",
+            "top-right"
+        );
+
+    }
+
+
+    if(
+        mode.value !== "reflection" &&
+        refracted !== null
+    ){
+
+        drawAngleArc(
+            x0,
+            y0,
+            refracted,
+            refracted.toFixed(2) + "°",
+            "#54e6a7",
+            "bottom-right"
+        );
+
+    }
+
+}
+
+
+function clamp(v,min,max){
+
+    return Math.max(min,Math.min(max,v));
+
+}
+
+
+function drawRay(x1,y1,x2,y2,color,width){
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.lineCap = "round";
+
+    ctx.beginPath();
+
+    ctx.moveTo(x1,y1);
+    ctx.lineTo(x2,y2);
+
+    ctx.stroke();
+
+}
+
+
+function drawArrow(x1,y1,x2,y2,color){
+
+    const ang =
+        Math.atan2(y2-y1,x2-x1);
+
+    const size = 16;
+
+    const x =
+        x1 + (x2-x1)*0.65;
+
+    const y =
+        y1 + (y2-y1)*0.65;
+
+    ctx.fillStyle = color;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        x,
+        y
+    );
+
+    ctx.lineTo(
+        x-size*Math.cos(ang-Math.PI/6),
+        y-size*Math.sin(ang-Math.PI/6)
+    );
+
+    ctx.lineTo(
+        x-size*Math.cos(ang+Math.PI/6),
+        y-size*Math.sin(ang+Math.PI/6)
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+}
+
+
+/*
+   ترسم قوساً حول نقطة السقوط ممثلاً زاوية معينة، مع كتابة قيمتها.
+   position يحدد أي ربع حول نقطة السقوط يُرسم فيه القوس:
+   - "top-left"     : بين العمود المقام (لأعلى) والشعاع الساقط (يسار)
+   - "top-right"    : بين العمود المقام (لأعلى) والشعاع المنعكس (يمين)
+   - "bottom-right" : بين العمود المقام (لأسفل) والشعاع المنكسر (يمين)
+*/
+function drawAngleArc(
+    x,
+    y,
+    degree,
+    text,
+    color,
+    position
+){
+
+    const radius = 75;
+
+    let start;
+    let end;
+    let labelAngle;
+
+    const rad = degree * Math.PI / 180;
+
+    if(position === "top-left"){
+
+        // من العمود العلوي (-90°) دورانًا نحو اليسار بمقدار الزاوية
+        start = -Math.PI/2 - rad;
+        end = -Math.PI/2;
+        labelAngle = -Math.PI/2 - rad/2;
+
+    }else if(position === "top-right"){
+
+        // من العمود العلوي (-90°) دورانًا نحو اليمين بمقدار الزاوية
+        start = -Math.PI/2;
+        end = -Math.PI/2 + rad;
+        labelAngle = -Math.PI/2 + rad/2;
+
+    }else{
+
+        // bottom-right: من العمود السفلي (+90°) دورانًا نحو اليمين
+        start = Math.PI/2 - rad;
+        end = Math.PI/2;
+        labelAngle = Math.PI/2 - rad/2;
+
+    }
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x,
+        y,
+        radius,
+        start,
+        end
+    );
+
+    ctx.stroke();
+
+    // كتابة قيمة الزاوية بجانب القوس
+    const labelR = radius + 22;
+
+    const lx = x + labelR * Math.cos(labelAngle);
+    const ly = y + labelR * Math.sin(labelAngle);
+
+    ctx.fillStyle = color;
+    ctx.font = "bold 17px Tahoma";
+    ctx.textAlign = "center";
+
+    ctx.fillText(text, lx, ly);
+
+}
+
+
+/*
+   عند تدوير الصفحة 90° بواسطة زر القلب، يتحول السلايدر بصرياً من
+   شريط أفقي إلى شريط عمودي، لكن بعض المتصفحات (خصوصاً WebView
+   الخاص بتطبيقات مثل Acode) لا تترجم حركة الإصبع بشكل صحيح مع هذا
+   الدوران فيصير السلايدر متخبط أو لا يستجيب بشكل طبيعي. لذلك نحسب
+   القيمة يدوياً من موضع اللمس الحقيقي على الشاشة، ونفعّل هذا الحساب
+   فقط أثناء وضع الشاشة المقلوبة؛ في الوضع العادي يبقى السلايدر
+   يعمل بسلوك المتصفح الافتراضي بلا أي تدخل.
+*/
+function makeRotationSafeRange(el){
+
+    let dragging = false;
+
+    function computeValue(clientY){
+
+        const rect = el.getBoundingClientRect();
+
+        // بعد الدوران 90° أصبح المحور الطولي للسلايدر هو المحور
+        // الرأسي (Y) بدل الأفقي (X)، والاتجاه معكوس بسبب اتجاه
+        // الدوران (rotate(90deg) من الأعلى‑اليسار)، لذلك نعكسه هنا
+        // حتى تطابق الحركة وضع العمودي (يمين=يمين، يسار=يسار)
+        const ratio = 1 - (clientY - rect.top) / rect.height;
+
+        const min = Number(el.min);
+        const max = Number(el.max);
+        const step = Number(el.step) || 1;
+
+        let val = min + Math.max(0, Math.min(1, ratio)) * (max - min);
+
+        val = Math.round(val / step) * step;
+
+        return Math.max(min, Math.min(max, val));
+
+    }
+
+    function apply(clientY){
+
+        const val = computeValue(clientY);
+
+        if(Number(el.value) !== val){
+
+            el.value = val;
+
+            el.dispatchEvent(new Event("input", { bubbles:true }));
+
+        }
+
+    }
+
+    function onStart(e){
+
+        if(!document.body.classList.contains("rotated-view")) return;
+
+        dragging = true;
+
+        const p = e.touches ? e.touches[0] : e;
+
+        apply(p.clientY);
+
+        e.preventDefault();
+
+    }
+
+    function onMove(e){
+
+        if(!dragging) return;
+
+        const p = e.touches ? e.touches[0] : e;
+
+        apply(p.clientY);
+
+        e.preventDefault();
+
+    }
+
+    function onEnd(){
+        dragging = false;
+    }
+
+    el.addEventListener("touchstart", onStart, { passive:false });
+    el.addEventListener("touchmove", onMove, { passive:false });
+    el.addEventListener("touchend", onEnd);
+    el.addEventListener("touchcancel", onEnd);
+
+    el.addEventListener("mousedown", onStart);
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onEnd);
+
+}
+
+makeRotationSafeRange(angleSlider);
+makeRotationSafeRange(angleFraction);
+
+
+angleSlider.addEventListener(
+    "input",
+    function(){
+
+        // عند تحريك السلايدر الرئيسي لدرجة جديدة، يبدأ الجزء العشري من صفر
+        angleFraction.value = 0;
+
+        calculate();
+
+    }
+);
+
+angleFraction.addEventListener(
+    "input",
+    calculate
+);
+
+/*
+   خانة إدخال الزاوية الدقيقة: تقبل أي قيمة عشرية بين 1° و90° مباشرة،
+   وتحرك السلايدرين معاً (الرئيسي + الجزء العشري) ليطابقا نفس القيمة.
+*/
+angleNumber.addEventListener(
+    "input",
+    function(){
+
+        let v = Number(angleNumber.value);
+
+        if(isNaN(v)) return;
+
+        setAngle(v);
+
+        calculate();
+
+    }
+);
+
+medium1.addEventListener(
+    "change",
+    calculate
+);
+
+medium2.addEventListener(
+    "change",
+    calculate
+);
+
+mode.addEventListener(
+    "change",
+    calculate
+);
+
+
+reset.addEventListener(
+    "click",
+    function(){
+
+        setAngle(40);
+
+        medium1.value = "1.5212011806012264";
+
+        medium2.value = "1.00";
+
+        mode.value = "both";
+
+        if(medium1._csSync) medium1._csSync();
+        if(medium2._csSync) medium2._csSync();
+        if(mode._csSync) mode._csSync();
+
+        calculate();
+
+    }
+);
+
+
+calculate();
+
+
+/*
+   شاشة البداية: إخفاؤها وإظهار المحاكي عند الضغط على "ابدأ التجربة"
+*/
+
+/*
+   زر تدوير الشاشة: يبدّل بين الوضع العادي ووضع تدوير المحتوى 90 درجة
+   الزر ثابت (position:fixed) فيبقى في مكانه عند تمرير الصفحة لأعلى ولأسفل
+*/
+
+/*
+   شريط عنوان المتصفح (خصوصاً عند فتح الصفحة من نتائج بحث جوجل)
+   يظهر ويختفي تلقائياً، فتتغير قيمة vh/vw الفعلية عدة مرات بعد
+   فتح الصفحة. الاعتماد على vh/vw فقط في CSS قد يجعل الصفحة المقلوبة
+   تُحسب بمقاس قديم فتظهر نص الشاشة فقط. لذلك نفرض هنا القياس
+   الحقيقي الحالي للنافذة بالبكسل مباشرة، ونعيد حسابه كل مرة يتغيّر
+   فيها حجم النافذة (بما فيها اختفاء/ظهور شريط العنوان).
+*/
+function applyRotatedSize(){
+
+    if(!document.body.classList.contains("rotated-view")) return;
+
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+
+    document.body.style.width = h + "px";
+    document.body.style.height = w + "px";
+
+}
+
+
+document.getElementById("rotateBtn").addEventListener(
+    "click",
+    function(){
+
+        document.body.classList.toggle("rotated-view");
+        document.documentElement.classList.toggle("rotated-html");
+
+        if(document.body.classList.contains("rotated-view")){
+
+            applyRotatedSize();
+
+        }else{
+
+            document.body.style.width = "";
+            document.body.style.height = "";
+
+        }
+
+        // إعادة رسم المحاكاة بعد تغيير أبعاد العرض
+        setTimeout(function(){
+            applyRotatedSize();
+            calculate();
+        }, 50);
+
+        // إعادة ضبط القياس بعد استقرار شريط عنوان المتصفح
+        // (اختفاؤه/ظهوره يحتاج وقتاً قصيراً بعد اللمسة الأولى)
+        setTimeout(applyRotatedSize, 350);
+
+    }
+);
+
+window.addEventListener("resize", applyRotatedSize);
+
+
+document.getElementById("startBtn").addEventListener(
+    "click",
+    function(){
+
+        document.getElementById("startScreen").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+
+        // إعادة رسم الشعاع بعد ظهور الكانفس لضمان رسمه بشكل صحيح
+        calculate();
+
+    }
+);
+
+
+</script>
+
+</body>
+</html>
